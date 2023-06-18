@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
 			}).save();
 		}
 
-		const url = `${process.env.BASE_URL}password-reset/${user._id}/${token.token}/`;
+		const url = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}/`;
 		await sendEmail(user.email, "Password Reset", url);
 
 		res
@@ -43,25 +43,47 @@ router.post("/", async (req, res) => {
 });
 
 // verify password reset link
+// router.get("/:id/:token", async (req, res) => {
+// 	try {
+// 		const user = await User.findOne({ _id: req.params.id });
+// 		if (!user) return res.status(400).send({ message: "Invalid link" });
+
+// 		const token = await Token.findOne({
+// 			userId: user._id,
+// 			token: req.params.token,
+// 		});
+// 		if (!token) return res.status(400).send({ message: "Invalid link" });
+
+// 		res.status(200).send('Valid Url')
+// 	} catch (error) {
+// 		res.status(500).send({ message: "Internal Server Error" });
+// 	}
+// });
+
+
+// verify password reset link
 router.get("/:id/:token", async (req, res) => {
 	try {
-		const user = await User.findOne({ _id: req.params.id });
-		if (!user) return res.status(400).send({ message: "Invalid link" });
-
-		const token = await Token.findOne({
-			userId: user._id,
-			token: req.params.token,
-		});
-		if (!token) return res.status(400).send({ message: "Invalid link" });
-
-		res.status(200).send("Valid Url");
+	  const user = await User.findOne({ _id: req.params.id });
+	  if (!user) return res.redirect("http://your-frontend-url.com/404"); // Redirect to a 404 page in the frontend
+  
+	  const token = await Token.findOne({
+		userId: user._id,
+		token: req.params.token,
+	  });
+	  if (!token) return res.redirect("http://your-frontend-url.com/404"); // Redirect to a 404 page in the frontend
+  
+	  res.redirect("http://localhost"); // Redirect to the frontend page for setting a new password
 	} catch (error) {
-		res.status(500).send({ message: "Internal Server Error" });
+	  res.status(500).send({ message: "Internal Server Error" });
 	}
-});
+  });
+  
+
+
 
 //  set new password
-router.post("/:id/:token", async (req, res) => {
+router.post("api/password-reset/:id/:token", async (req, res) => {
 	try {
 		const passwordSchema = Joi.object({
 			password: passwordComplexity().required().label("Password"),

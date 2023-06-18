@@ -38,6 +38,15 @@ router.post("/", async (req, res) => {
 	}
 });
 
+router.get('/data',async(req ,res) => {
+	try{
+		const user = await User.findOne(Token);
+	res.status(200).json(user);
+	}catch(err){
+		res.send(400).json({message : "Error" ,err});
+	}
+})
+
 router.get("/:id/verify/:token/", async (req, res) => {
 	try {
 		const user = await User.findOne({ _id: req.params.id });
